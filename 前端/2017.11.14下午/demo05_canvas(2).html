@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Canvas</title>
+
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+
+    <script type="text/javascript">
+        function btnBasicCanvas_click() {
+            let canvas = document.getElementById('canvas');
+            let context = canvas.getContext('2d');//2d表示2维图。
+
+            context.strokeStyle = '#ff0000';
+            context.lineWidth = 3;
+            context.strokeRect(20,20,100,50);//画矩形参数列表（x坐标，y坐标，宽度，高度），stroke画线
+
+            context.fillStyle = '#00ff00';
+            context.fillRect(140, 20, 100, 50);//fill填充整个面。
+
+            context.strokeStyle = '#000000';
+            context.beginPath();
+            context.moveTo(20, 90);
+            context.lineTo(880, 90);
+            context.closePath();
+            context.stroke();
+
+
+            context.beginPath();//开始路径，
+            context.moveTo(300, 200);
+            context.arc(300, 200, 100, 0, 3.14/2, false);
+            context.closePath();//这句注释掉，不关闭路径，1/4圆的扇形区域，最后点不会回到圆心，结果是个开口扇形。
+            context.stroke();
+
+        }
+
+
+        function graphics1() {
+            let data = [
+                [90, 60, 70, 65, 85, 100],
+                [85, 65, 75, 70, 80, 90]
+            ];
+
+            let colors = ['#ff0000', '#0000ff'];
+
+            let canvas = document.getElementById('canvas');
+            let context = canvas.getContext('2d');
+
+            // 坐标轴
+            context.strokeStyle = '#666666';//设置线条颜色
+            context.beginPath();//开始路径
+            context.moveTo(50, 50);//先到起始点
+            context.lineTo(50, canvas.height - 50);//移动当前坐标点，即画布里坐标系的原点。
+            context.stroke();//开始画图，画出所有经过的路径，当前画了一条Y轴
+
+            context.beginPath();//再开始路径
+            context.moveTo(50, canvas.height - 50);//移动到当前坐标点（坐标原点）开始画，
+            context.lineTo(canvas.width - 50, canvas.height - 50);//x轴画完
+            context.stroke();//开始在经过的路径画图。
+
+
+            // 计算
+            let itemCount = data[0].length;
+
+            let max = Number.MIN_VALUE;
+            let min = Number.MAX_VALUE;
+            for(let i=0; i<data.length; i++) {
+                for(let j=0; j<data[i].length; j++) {
+                    if(data[i][j] > max) {
+                        max = data[i][j];
+                    }
+                    if(data[i][j] < min) {
+                        min = data[i][j];
+                    }
+                }
+            }
+            console.log(max);//控制台打印最大和最小值，在网页里右键点击检查，里面的console会显示该数据信息。
+            console.log(min);
+            // min = 0;
+
+            let dx = (canvas.width-100)/(itemCount + 1);//一共有6个点，所以把x轴分成7段，使6个数据点以平均宽度显示在水平轴上。
+            let dy = (canvas.height-100-30-30)/(max-min);//根据数据的大小，使数据尽量占满纵轴，100是坐标轴距离画布垂直放向的
+                                                         // 距离（相当于margin），30是最大值和最小值距离坐标轴的距离(相当于padding)。
+            for(let i=0; i<data.length; i++) {
+                context.strokeStyle = colors[i];
+                context.lineWidth = 2;//线宽2
+                context.fillStyle = colors[i];//指定fill填充色。
+
+                context.beginPath();
+                for (let j = 0; j < data[i].length; j++) {
+                    let x = 50 + (j+1)*dx;
+                    let y = 50 + 30 + ((canvas.height-100-30-30) - (data[i][j]-min)*dy);//当前的的数据减去最小值然后乘上dy，表示高度，
+                                                                                        //用画布和高度减去上下距离，减去高度，得到实际应该显示的坐标，
+                    if(j === 0){
+                        context.moveTo(x, y);//如果是第一个数据点，就先定位，定位到该点，不是则开始移动（lineTo）
+                    }
+                    else {
+                        context.lineTo(x, y);
+                    }
+                }
+                context.stroke();//开始画图，描线。
+
+                for (let j = 0; j < data[i].length; j++) {
+                    let x = 50 + (j+1)*dx;
+                    let y = 50 + 30 + ((canvas.height-100-30-30) - (data[i][j]-min)*dy);
+
+                    context.beginPath();
+                    context.moveTo(x, y);
+                    context.arc(x, y, 5, 0, Math.PI*2, false);//和上面的步骤类似，以每个数据点为圆心画个圆，以着重显示。
+                                                            //arc()画圆的方法，参数列表（x坐标，y坐标，半径，起始角度，终止角度，是否为逆时针旋转）false时顺时针。
+                    context.fill();  //fill表示填充，当前画好的圆形用fill填充，填充色上面已经指定。
+                }
+            }
+        }
+
+    </script>
+</head>
+<body>
+<div class="container">
+    <h2>Canvas</h2>
+    <hr />
+    <p>
+        <button class="btn btn-default" onclick="btnBasicCanvas_click();">Basic</button>
+        <button class="btn btn-default" onclick="graphics1();">折线图</button>
+    </p>
+    <hr />
+    <div style="text-align: center">
+        <canvas id="canvas" width="800px" height="500px" style="margin: 10px auto; border: 1px solid #666"></canvas>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JQuery</title>
+
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+
+    <script type="text/javascript" src="jquery/jquery-3.2.1.js"></script>//在引入jquery工具库的时候，一般把引入文件放在body之后，等页面加载完。
+    <script type="text/javascript">
+
+        function btnDom_click() {
+            let value = document.getElementById('inputText').value;
+            document.getElementById('lblMessage').innerHTML = value;//dom查询
+        }
+
+        function btnJQuery_click() {
+            let value = $('#inputText').val();//jquery对象，调用方法括号里无参数，将获得的值传给value。
+//            $('#inputText').val('hehe');//jquey对象设置对象属性的值，方法里含参数，将参数的值设置为对象的val属性的值。
+
+//            let htmlContent = $('#lblMessage').html();
+//            $('#lblMessage').html(value);
+
+
+            // JQuery对象转换为DOM对象
+            // $('#lblMessage')[0].innerHTML = value;
+
+            // $($('.class')[i])
+            // $('#canvas')[0].getContext('2d');
+
+            // DOM对象转换为JQuery对象
+            $(document.getElementById('lblMessage')).html(value);
+        }
+
+        function btnChild_click() {
+            // $('#myTable tr:nth-child(2)').css('background', '#ffff00');
+
+            $('#myTable tr:gt(2)').css('background', '#ffff00');//￥（）表示jQuery对象，括号里表示具体的html里的内容。
+        }                                                       //gt: grater than 2指的是索引从0开始，不同于伪类选择器的:nth-child(n)从1开始。
+    </script>
+</head>
+<body>
+<div class="container">
+    <h2>JQuery选择器</h2>
+    <hr />
+    <h3>JQuery对象与DOM对象</h3>
+    <input type="text" class="form-control" id="inputText">
+    <p id="lblMessage">点击相应的按钮</p>
+    <p>
+        <button class="btn btn-default" onclick="btnDom_click();">DOM对象操作</button>
+        <button class="btn btn-default" onclick="btnJQuery_click();">JQuery对象操作</button>
+    </p>
+
+    <hr />
+    <h3>:child与:gt</h3>
+    <button class="btn btn-default" onclick="btnChild_click();">Child操作</button>
+    <table style="width: 500px" class="table table-bordered" id="myTable">
+        <tr>
+            <td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td>
+        </tr>
+        <tr>
+            <td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td>
+        </tr>
+        <tr>
+            <td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td>
+        </tr>
+        <tr>
+            <td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td>
+        </tr>
+        <tr>
+            <td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td><td>AAA</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

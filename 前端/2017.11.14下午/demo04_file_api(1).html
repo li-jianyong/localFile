@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML 5</title>
+
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="styles/style.css">
+
+    <script type="text/javascript">
+        function btnSetSessionStorage_click() {
+            let value = document.getElementById('inputText').value;
+
+            sessionStorage.setItem('MySessionStorage', value);
+        }
+        function btnGetSessionStorage_click() {
+            let value = sessionStorage.getItem('MySessionStorage');
+            alert(value);
+        }
+
+        function btnSetLocalStorage_click() {
+            let value = document.getElementById('inputText').value;
+
+            localStorage.setItem('MyLocalStorage', value);
+        }
+        function btnGetLocalStorage_click() {
+            let value = localStorage.getItem('MyLocalStorage');
+            alert(value);
+        }
+
+
+
+        function file_change() {
+            let fileControl = document.getElementById('file');
+            let files = fileControl.files;
+
+            let tableContentText = '';
+            for(let i=0; i<files.length; i++) {
+                let file = files[i];
+
+                let trContent = '';
+                trContent += '<tr>';
+                trContent += '<td>'+file.name+'</td>';
+                trContent += '<td>'+file.type+'</td>';
+                trContent += '<td>'+file.size+'</td>';
+                trContent += '<td><img id="img'+i+'" style="width:160px; height:120px"></td>';//第四列加载图片，并添加了id选择器,名字为img+i。都是为了作同步处理。保障线程安全。
+                trContent += '</tr>';
+                                            //作业，怎么让图片加载是同步处理不出现窜行显示。
+                                            //将每次循环开始加载的图片一个i标记
+                tableContentText+=trContent;
+
+                let reader = new FileReader();
+                reader.tag = i;//添加tag属性，reader对象，js对象属性任意添加，并且此时把i的值赋给它，
+
+                reader.onload = function (res) {
+                    readerId = res.target.tag;//依据image的tag值来进行加载，保证加载的图片能对应上。
+                    document.getElementById('img'+readerId).src = res.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            document.getElementById('tableContent').innerHTML = tableContentText;
+        }
+
+
+
+        function textFile_change(files) {
+            let file = files[0];
+
+            let reader = new FileReader();
+            reader.onload = function (res) {
+                console.log(res);
+
+                document.getElementById('textFileContent').innerHTML = res.target.result;
+            };
+
+            reader.readAsText(file);
+        }
+
+        function imageFile_change(files) {
+            let file = files[0];
+
+            let reader = new FileReader();
+            reader.onload = function (res) {
+                document.getElementById('imageContent').src = res.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <h2>HTML5 本地存储与文件API</h2>
+    <hr />
+    <h3>Session存储与本地存储</h3>
+    <p>
+        <input class="form-control" type="text" id="inputText">
+    </p>
+    <p>
+        Session存储：
+        <button class="btn btn-default" onclick="btnSetSessionStorage_click();">保存</button>
+        <button class="btn btn-default" onclick="btnGetSessionStorage_click();">获取</button>
+    </p>
+    <p>
+        本地数据存储：
+        <button class="btn btn-default" onclick="btnSetLocalStorage_click();">保存</button>
+        <button class="btn btn-default" onclick="btnGetLocalStorage_click();">获取</button>
+    </p>
+
+    <hr />
+    <h3>File API</h3>
+    <input type="file" id="file" accept="image/*" multiple onchange="file_change();">
+
+    <table class="table table-bordered" style="width: 500px">
+        <thead>
+        <tr>
+            <th style="width: 100px">文件名</th>
+            <th style="width: 100px">文件类型</th>
+            <th style="width: 100px">文件大小</th>
+            <th style="width: 200px">文件预览</th>
+        </tr>
+        </thead>
+        <tbody id="tableContent"></tbody>
+    </table>
+
+
+    <hr />
+    <h3>文本文件预览</h3>
+    <input type="file" accept="text/*" multiple onchange="textFile_change(this.files);">
+    <pre id="textFileContent"></pre>
+
+
+    <hr />
+    <h3>图片文件预览</h3>
+    <input type="file" accept="image/*" multiple onchange="imageFile_change(this.files);">
+    <div>
+        <img id="imageContent">
+    </div>
+</div>
+</body>
+</html>

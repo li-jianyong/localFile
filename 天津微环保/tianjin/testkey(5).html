@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta name="viewport" content="width=device-width,user-scalable=0,initial-scale=1.0">
+    <script src="./bower_components/jquery/dist/jquery.min.js" type="text/javascript"></script>
+    <script src="./bower_components/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="./bower_components/jQuery-contextMenu/dist/jquery.contextMenu.min.js" type="text/javascript"></script>
+    <script src='./bower_components/underscore/underscore-min.js'></script>
+    <script src="./bower_components/jquery-migrate/jquery-migrate.min.js" type="text/javascript"></script>
+    <script src="./bower_components/jquery.slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <script src="./bower_components/blockUI/jquery.blockUI.js" type="text/javascript"></script>
+    <script src="./bower_components/jquery.cookie/jquery.cookie.js" type="text/javascript"></script>
+    <script src="./bower_components/bootstrap/dist/js/bootstrap.min.js" type="text/javascript"></script>
+    <link href="./bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <title>天府微环保开放平台 | 用户管理</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            font-family: '微软雅黑';
+        }
+        body,html{
+            height: 100%;
+            min-height: 100%!important;
+        }
+
+    </style>
+</head>
+<body>
+<object id="democtrl" width="800" height="470" classid="clsid:BB353411-79EA-45BD-82CE-23643FECBD32">
+</object>
+<br />
+<select id="selsplit" onchange="splitchange(this)">
+    <option value="0">单画面</option>
+    <option value="1">四画面</option>
+    <option value="2">九画面</option>
+    <option value="3">十六画面</option>
+    <option value="4">二十五画面</option>
+    <option value="5">三十六画面</option>
+</select>
+<input type="button" value="播放" id="play" onclick="paly()">
+<input type="button" value="Stop" id="stop" onclick="stop()">
+<input type="button" value="控件初期化" id="InitCtrl" onclick="InitCtrl(1);">
+<input type="button" value="截图" id="Play6" onclick="Recorde_Screen_Shot()">
+<input type="button" value="设定视频参数" id="Play7" onclick="SetImageConfiguration()">
+<input type="button" value="录像开始" id="Play8" onclick="recordstart()">
+<input type="button" value="录像停止" id="Play8" onclick="recordstop()">
+<input type="button" value="切换" id="Play9" onclick="paly9()">
+<input type="button" value="winID" id="Play11" onclick="paly11()">
+<input type="button" value="全部停止" id="stopall" onclick="stopall()">
+<input type="button" value="VOD播放" id="VodPlay" onclick="vodPlay()">
+<input type="button" value="VOD停止" id="VodStop" onclick="vodStop()">
+<input type="text" onkeydown="return noNumbers(event)" />
+</body>
+</html>
+
+<!--<script type="text/javascript" src="//res.cdn.openinstall.io/openinstall.js"></script>-->
+<!--<script src="app/chart.js"></script>-->
+<script>
+    //文档加载后激活函数
+    $(document).ready(function () {
+        docload();
+    });
+    var objCtrl = null;
+    //开始播放
+//    var cameraInfo = {};
+//    cameraInfo.dChannelID = 1;
+//    cameraInfo.dwCameraID = 1;
+//    cameraInfo.dwDeviceID = 1;
+//    var deviceinfo = {};
+//    deviceinfo.nPort = 80;
+//    deviceinfo.strIP = "34020000001330000001";
+//    deviceinfo.strUser = "admin";
+//    deviceinfo.strPwd = "admin";
+//    deviceinfo.dwDeviceID = 1;
+//    deviceinfo.nSubDeviceCnts = 1;
+//    deviceinfo.nDeviceType = 0x03;
+//  deviceinfo.pCameraInfo = cameraInfo;
+//    console.log(deviceinfo)
+	var     WM_USER							=   1024;
+	var		VIDEO_USER_COMMAND_UP			=	WM_USER + 2011;
+	var		VIDEO_USER_COMMAND_DOWN			=	WM_USER + 2012;
+	var		VIDEO_USER_COMMAND_LEFT			=	WM_USER + 2013;
+	var		VIDEO_USER_COMMAND_RIGHT		=	WM_USER + 2014;
+	var		VIDEO_USER_COMMAND_UPLEFT		=	WM_USER + 2015;
+	var		VIDEO_USER_COMMAND_UPRIGHT		=	WM_USER + 2016;
+	var		VIDEO_USER_COMMAND_DOWNLEFT		=	WM_USER + 2017;
+	var		VIDEO_USER_COMMAND_DOWNRIGHT	=	WM_USER + 2018;
+	var		VIDEO_USER_COMMAND_FOCUSPLUS	=	WM_USER + 2021;
+	var		VIDEO_USER_COMMAND_FOCUSMINUS	=	WM_USER + 2022;
+	var		VIDEO_USER_COMMAND_RATIOPLUS	=	WM_USER + 2023;
+	var		VIDEO_USER_COMMAND_RATIOMINUS	=	WM_USER + 2024;
+	var		VIDEO_USER_COMMAND_APERTUREPLUS	=	WM_USER + 2025;
+	var		VIDEO_USER_COMMAND_APERTUREMINUS	=	WM_USER + 2026;
+	var		VIDEO_USER_COMMAND_TAB			=	WM_USER + 2030;
+	var		VIDEO_USER_COMMAND_RETURN		=	WM_USER + 2031;
+	var		VIDEO_USER_COMMAND_SPACE		=	WM_USER + 2032;
+	var		VIDEO_USER_COMMAND_ESC			=	WM_USER + 2033;
+	function stopall()
+    {
+        if (objCtrl)
+        {
+            
+			var ret = objCtrl.StopAll();
+
+
+            if (ret != 1)
+            {
+                alert("停止失败" + ret);
+            }
+
+        }
+    }
+    function paly()
+    {
+        if (objCtrl)
+        {
+            
+			//objCtrl.InitCtrl( "146B3E27-EF48-41A4-B07F-260EEBAF09AF","172.17.7.17", 6261, 5);  //172.17.6.75 172.17.6.155
+			//objCtrl.InitCtrl(1);
+            var winid = objCtrl.GetSelWin();
+			var winstate = objCtrl.GetWinState(winid);
+			// 播放状态=》停止当前播放
+			if(winstate == 1)
+			{
+				objCtrl.Stop(winid);
+			}
+            objCtrl.InitWindow(winid, "146B3E27-EF48-41A4-B07F-260EEBAF09AF","172.17.7.17",6261, 0);
+			var ret = objCtrl.Play(
+                winid,//winID
+				1, // 码流 0：主码流 1：子码流 2：第三码流
+                "146B3E27-EF48-41A4-B07F-260EEBAF09AF",
+               "测试设备", // 设备名称
+                 0x99, // 设备类型
+                "172.17.7.146", // 设备IP  172.17.7.146  34020000001330000001  34020000001320000001 34020000001390000001 34020000002000000001
+                80, // 设备端口
+                1, // 设备ID
+                1, // 通道ID
+                "admin", // 用户名
+                "qianliming123@" // 密码  admin qianliming123@
+            ); 
+
+
+            if (ret != 1)
+            {
+                alert("播放失败" + ret);
+            }
+
+        }
+    }
+    //回放停止
+    function vodStop()
+    {
+        if (objCtrl)
+        {
+			var winID = objCtrl.GetSelWin();
+			
+			var winstate = objCtrl.GetWinState(winID);
+			alert('停止');
+			
+			if(winstate == 1)
+			{alert('停止2');
+				//objCtrl.StopVodStream("146B3E27-EF48-41A4-B07F-260EEBAF09AF", stop1);
+				objCtrl.Stop(winID);
+				
+				
+			}
+			
+		}
+		
+	}
+    //回放点播
+    function vodPlay()
+    {
+        if (objCtrl)
+        {
+            var queryStartTime = GetTimeStamp("2018/01/22 11:01:01");
+			//alert(startTime);
+            
+			var queryEndTime = GetTimeStamp("2018/01/22 11:05:01");
+			
+			var winid = objCtrl.GetSelWin();
+			var winstate = objCtrl.GetWinState(winid);
+			// 播放状态=》停止当前播放
+			if(winstate == 1)
+			{
+				objCtrl.Stop(winid);
+				
+			}
+			//alert(winState);
+			
+            var ret = objCtrl.InitWindow(winid, "146B3E27-EF48-41A4-B07F-260EEBAF09AF","172.17.7.17",6261, 0);
+			//alert(ret);
+			var n = objCtrl.FindFile(
+                winid,//winID
+                "146B3E27-EF48-41A4-B07F-260EEBAF09AF",//serverUuid
+                80, // 设备端口devicePort
+                "34020000001330000001", // 设备IPstrIP 172.17.7.146  34020000001330000001  34020000001320000001 34020000001390000001 34020000002000000001
+                "admin", // 用户名deviceUser
+                "admin" ,// 密码devicePwd qianliming123@
+                1, // 设备ID dwDeviceID
+                0,//dwReserved
+                1,//DeviceCnts
+                0x03, // 设备类型 DeviceType
+                1,//摄像头ID dwCameraID
+                1 ,// 通道ID dChannelID
+                1,//vodMode
+                0,//enumFileType
+                queryStartTime,//startTime
+                queryEndTime//endTime
+            );
+			alert('n的值'+n);
+            var startTime;
+            var endTime;
+			var fileCnt = 0;
+            if (n != '')
+            {
+                //do{
+                var m = objCtrl.find_next_file(
+                    "146B3E27-EF48-41A4-B07F-260EEBAF09AF",//uuid
+                    n
+                )
+				alert('m的值'+m);
+				fileCnt++;
+                var j = JSON.parse(m);
+				
+                var ret = j.nRet;
+				alert(ret);
+                if(ret!= -712 || ret != 1)
+                {
+                    startTime = j.startTime;
+                }
+                while(ret!= -712 && ret!=0 ){
+
+                    endTime = j.endTime;
+                    var m = objCtrl.find_next_file(
+                        "146B3E27-EF48-41A4-B07F-260EEBAF09AF",
+                        n
+                    )
+					fileCnt++;
+                    var j = JSON.parse(m);
+                    var ret = j.nRet
+                }
+            }
+            alert('startTime的值是'startTime + "_" + 1516504245);
+
+            if(m != ''){
+			
+            var d = objCtrl.StartVodStream(
+                winid,//winID
+                80, // 设备端口devicePort
+                "34020000001330000001", // 设备IPstrIP  34020000001330000001 172.17.7.146
+                "admin", // 用户名deviceUser
+                "admin" ,// 密码devicePwd
+                1, // 设备ID dwDeviceID
+                0,//dwReserved
+                1,//DeviceCnts
+                0x03, // 设备类型 DeviceType
+                1,//摄像头ID dwCameraID
+                1 ,// 通道ID dChannelID
+                queryStartTime,
+                queryEndTime,
+                0, //(fileCnt - 1),//dold_sessionid
+                "146B3E27-EF48-41A4-B07F-260EEBAF09AF",//uuID
+                1//dReserved
+            )
+            alert('d的值'+d);
+        }
+
+        }
+        //stop1 = d;//play_session由StartVodStream方法返回。
+       //return d
+        //console.log(stop1)
+    }	
+	
+
+    //    var obj ={};
+    //    obj.name=''
+    //    function paly2()
+    //    {
+    //        if (objCtrl)
+    //        {
+    //            var ret = objCtrl.Play(
+    //             obj
+    //            );
+    //            if (ret != 1)
+    //            {
+    //                alert("播放失败" + ret);
+    //            }
+    //        }
+    //    }
+    function recordstart()
+	{
+        var time1 = new Date().Format("yyyyMMddhhmmss");
+		
+		if (objCtrl)
+        {
+            var ret = objCtrl.SelectFolder(0, 1);
+			if(ret == 1)
+			{
+				var timestamp = Date.parse(new Date()); 
+				ret = objCtrl.StartRecorde(	0, "1", "二环路摄像头一" + "_" + time1, 0);
+				if (ret != 1)
+				{
+					alert("录制失败" + ret);
+				}
+			}
+		}
+		
+	}
+	
+	// 对Date的扩展，将 Date 转化为指定格式的String
+	// 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符， 
+	// 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字) 
+	// 例子： 
+	// (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423 
+	// (new Date()).Format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18 
+	Date.prototype.Format = function (fmt) 
+	{ //author: meizz 
+		var o = {
+			"M+": this.getMonth() + 1, //月份 
+			"d+": this.getDate(), //日 
+			"h+": this.getHours(), //小时 
+			"m+": this.getMinutes(), //分 
+			"s+": this.getSeconds(), //秒 
+			"q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+			"S": this.getMilliseconds() //毫秒 
+		};
+		if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+		for (var k in o)
+		if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+		return fmt;
+	
+	}
+	
+	// 参数格式 2018/12/03 13:21:51
+	function GetTimeStamp(timestr)
+	{
+		var timestampStr = (Date.parse(new Date(timestr)) * 1) / 1000;
+	
+		return timestampStr + "";
+	}
+	
+	
+    function recordstop()
+	{
+        if (objCtrl)
+        {
+            var ret = objCtrl.StartRecorde(0, "1", "二环路摄像头一" , 1);
+		}
+		
+	}
+    function Recorde_Screen_Shot()
+	{
+        if (objCtrl)
+        {
+            var ret = objCtrl.SelectFolder(0, 0);
+			if (ret == 1)
+            {
+                var time1 = new Date().Format("yyyyMMddhhmmss");
+				ret = objCtrl.Recorde_Screen_Shot(0, "1", "二环路摄像头一" + "_" + time1);
+				if (ret != 1)
+				{
+					alert("截屏失败" + ret);
+				}
+            }
+			
+		}
+		
+	}	
+	function SetImageConfiguration()
+	{
+        if (objCtrl)
+        {
+            var ret = objCtrl.SetImageConfiguration(0, "1", "1", "1", "1");
+			if (ret != 1)
+            {
+                alert("视频参数设定失败:" + ret);
+            }
+		}
+		
+	}
+
+    // 停止播放
+    function stop()
+    {
+        if (objCtrl)
+        {
+            var winID = objCtrl.GetSelWin();
+			var ret = objCtrl.GetWinState(winID);
+			
+			ret = objCtrl.Stop(winID);
+            if (ret != 1)
+            {
+                alert("停止失败");
+            }
+        }
+    }
+
+    //获取winID
+
+    // 切换分屏
+    function splitchange(objSel)
+    {
+        var split = objSel.selectedIndex;
+        if (objCtrl)
+        {
+            // SetSplit(int split) 画面数
+            objCtrl.SetSplit(split);
+        }
+    }
+    function paly9()
+    {
+        if (objCtrl)
+        {
+            var ret = objCtrl.Ptz_Control(
+                "146B3E27-EF48-41A4-B07F-260EEBAF09AF"
+
+            );
+            alert("111")
+            if (ret != 1)
+            {
+                alert("播放失败" + ret);
+            }
+        }
+    }
+    //获取winID
+    function paly11()
+    {
+        if (objCtrl)
+        {
+            var winID = objCtrl.GetSelWin()
+            alert(winID)
+
+        }
+    }
+    //
+
+    //截图
+    function paly10()
+    {
+        if (objCtrl)
+        {
+            var winID = objCtrl.GetSelWin()
+            objCtrl.Screen_Shot(
+                winID,
+                "D:\\files\\1.jpg"
+            );
+        }
+    }
+
+//事实点播
+        var obj ={};
+        obj.winID='';
+    function realTime()
+    {
+        if (objCtrl)
+        {
+            var n = objCtrl.FindFile(
+            0,//winID
+            "146B3E27-EF48-41A4-B07F-260EEBAF09AF",
+            80, // 设备端口
+            "34020000001330000001", // 设备IP
+            "admin", // 用户名
+            "admin" ,// 密码
+            1, // 设备ID
+            0,
+            1,
+            0x03, // 设备类型
+            1,//摄像头ID
+            1 ,// 通道ID
+            0,
+            0,
+            1512237722,
+            1512324122
+        );
+            if (n != '')
+            {
+                do
+                {
+                    var i=1
+                    var m = objCtrl.find_next_file(
+                        "146B3E27-EF48-41A4-B07F-260EEBAF09AF",
+                        n
+                    )
+                    i++
+                    var j = JSON.parse(m);
+
+                        console.log(j.ret);
+
+                }
+                while (i=0);
+
+            }
+        }
+    }
+    console.log(obj)
+    function docload()
+    {
+        objCtrl = document.getElementById("democtrl");
+        if (objCtrl)
+        {
+            var objSel = {}
+            objSel.selectedIndex = 0;
+            objCtrl.SetSplit(1);
+            // InitCtrl(string serverIp, int serverPort) 服务器IP，服务器端口号
+            //play(x);
+        }
+    }
+//    function noNumbers(e){
+//                    var e = event || window.event || arguments.callee.caller.arguments[0];
+//              if(e && e.keyCode==38){ // 向上箭头
+//				  if (objCtrl)
+//				  {
+//					  var ret = objCtrl.TransferKeyCommand(
+//						  0,//winID
+//						  VIDEO_USER_COMMAND_UP, // 键盘按键码
+//						  50, // 参数1
+//						  0 // 参数2
+//					  );
+//					  if (ret != 1)
+//					  {
+//						  alert("失败" + ret);
+//					  }
+//				  }
+//				}
+//              if(e && e.keyCode==40){ // 向下箭头
+//				  if (objCtrl)
+//				  {
+//					  var ret = objCtrl.TransferKeyCommand(
+//						  0,//winID
+//						  VIDEO_USER_COMMAND_DOWN, // 键盘按键码
+//						  50, // 参数1
+//						  0 // 参数2
+//					  );
+//					  if (ret != 1)
+//					  {
+//						  alert("失败" + ret);
+//					  }
+//
+//				  }
+//				}
+//              if(e && e.keyCode==37){ // 向左箭头
+//				  if (objCtrl)
+//				  {
+//					  var ret = objCtrl.TransferKeyCommand(
+//						  0,//winID
+//						  VIDEO_USER_COMMAND_LEFT, // 键盘按键码
+//						  50, // 参数1
+//						  0 // 参数2
+//					  );
+//					  if (ret != 1)
+//					  {
+//						  alert("失败" + ret);
+//					  }
+//
+//				  }
+//				}
+//              if(e && e.keyCode==39){ // 向右箭头
+//				  if (objCtrl)
+//				  {
+//					  var ret = objCtrl.TransferKeyCommand(
+//						  0,//winID
+//						  VIDEO_USER_COMMAND_RIGHT, // 键盘按键码
+//						  50, // 参数1
+//						  0 // 参数2
+//					  );
+//					  if (ret != 1)
+//					  {
+//						  alert("失败" + ret);
+//					  }
+//
+//				  }
+//				}
+//              if(e && e.keyCode==33){ // PageUp
+//				  if (objCtrl)
+//				  {
+//					  var ret = objCtrl.TransferKeyCommand(
+//						  0,//winID
+//						  VIDEO_USER_COMMAND_RATIOPLUS, // 键盘按键码
+//						  5, // 参数1
+//						  0 // 参数2
+//					  );
+//					  if (ret != 1)
+//					  {
+//						  alert("失败" + ret);
+//					  }
+//
+//				  }
+//				}
+//              if(e && e.keyCode==34){ // PageDown
+//				  if (objCtrl)
+//				  {
+//					  var ret = objCtrl.TransferKeyCommand(
+//						  0,//winID
+//						  VIDEO_USER_COMMAND_RATIOMINUS, // 键盘按键码
+//						  5, // 参数1
+//						  0 // 参数2
+//					  );
+//					  if (ret != 1)
+//					  {
+//						  alert("失败" + ret);
+//					  }
+//
+//				  }
+//				}
+//				if(e && e.keyCode==113){ // 按 F2
+//				  alert(113)
+//					 }
+//			    if(e && e.keyCode==13){ // enter 键
+//				   alert(13)
+//					}
+//               };
+
+
+    document.onkeydown=function(event){
+        var e = event || window.event || arguments.callee.caller.arguments[0];
+        if(e && e.keyCode==13){ // enter 键
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_RETURN, // 键盘按键码
+                    5, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+            }
+        }
+        if(e && e.keyCode==38){ // 向上箭头
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_UP, // 键盘按键码
+                    50, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+            }
+        }
+        if(e && e.keyCode==40){ // 向下箭头
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_DOWN, // 键盘按键码
+                    50, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+
+            }
+        }
+        if(e && e.keyCode==37){ // 向左箭头
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_LEFT, // 键盘按键码
+                    50, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+
+            }
+        }
+        if(e && e.keyCode==39){ // 向右箭头
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_RIGHT, // 键盘按键码
+                    50, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+
+            }
+        }
+        if(e && e.keyCode==34){ // PageUp
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_RATIOPLUS, // 键盘按键码
+                    5, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+
+            }
+        }
+        if(e && e.keyCode==33){ // PageDown
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_RATIOMINUS, // 键盘按键码
+                    5, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+            } 
+        }
+        if(e && e.keyCode==9){ // tab
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_TAB, // 键盘按键码
+                    5, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+
+            }
+        }	
+        if(e && e.keyCode==27){ // ESC
+            if (objCtrl)
+            {
+                var ret = objCtrl.TransferKeyCommand(
+                    0,//winID
+                    VIDEO_USER_COMMAND_ESC, // 键盘按键码
+                    5, // 参数1
+                    0 // 参数2
+                );
+                if (ret != 1)
+                {
+                    alert("失败" + ret);
+                }
+
+            }
+        }
+		
+    };
+</script>
